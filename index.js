@@ -55,6 +55,7 @@ var webhook = require('./api/webhook');
 var workflow = require('./api/workflow');
 var workflowScheme = require('./api/workflowScheme');
 var worklog = require('./api/worklog');
+var tempo = require('./api/tempo')
 
 /**
  * Represents a client for the Jira REST API
@@ -107,6 +108,7 @@ var worklog = require('./api/worklog');
  * @property {WorkflowClient} workflow
  * @property {WorkflowSchemeClient} workflowScheme
  * @property {WorklogClient} worklog
+ * @property {TempoClient} tempo
  *
  * @param config The information needed to access the Jira API
  * @param {string} config.host The hostname of the Jira API.
@@ -132,6 +134,7 @@ var worklog = require('./api/worklog');
  *      Default - native Promise.
  * @param {Request} [config.request] Any function (constructor) compatible with Request (request, supertest,...).
  *      Default - require('request').
+ * @param {string} [config.tempoApiKey] Jira tempo plugin developer key. MUST be include if tempo api used.
  */
 
 var JiraClient = module.exports = function (config) {
@@ -144,11 +147,13 @@ var JiraClient = module.exports = function (config) {
     this.port = config.port;
     this.apiVersion = 2; // TODO Add support for other versions.
     this.agileApiVersion = '1.0';
+    this.tempoApiVersion = '3'
     this.authApiVersion = '1';
     this.webhookApiVersion = '1.0';
     this.promise = config.promise || Promise;
     this.requestLib = config.request || request;
-
+    this.tempoApiKey = config.tempoApiKey
+   
     if (config.oauth) {
         if (!config.oauth.consumer_key) {
             throw new Error(errorStrings.NO_CONSUMER_KEY_ERROR);
@@ -232,6 +237,7 @@ var JiraClient = module.exports = function (config) {
     this.workflow = new workflow(this);
     this.workflowScheme = new workflowScheme(this);
     this.worklog = new worklog(this);
+    this.tempo = new tempo(this);
 };
 
 (function () {
@@ -273,6 +279,20 @@ var JiraClient = module.exports = function (config) {
             hostname: this.host,
             port: this.port,
             pathname: apiBasePath + version + path
+        });
+
+        return decodeURIComponent(requestUrl);
+    };
+
+     this.buildTempoURL = function (path) {
+        var apiBasePath = this.path_prefix + 'rest/tempo-timesheets/';
+        var version = this.tempoApiVersion;
+        var requestUrl = url.format({
+            protocol: this.protocol,
+            hostname: this.host,
+            port: this.port,
+            pathname: apiBasePath + version + path,
+            qs: 'tempoApiToken=' + this.tempoApiKey
         });
 
         return decodeURIComponent(requestUrl);
