@@ -298,6 +298,19 @@ var JiraClient = module.exports = function (config) {
         return decodeURIComponent(requestUrl);
     };
 
+     this.buildTempoCoreURL = function (path) {
+        var apiBasePath = this.path_prefix + 'rest/tempo-core/1';
+        var requestUrl = url.format({
+            protocol: this.protocol,
+            hostname: this.host,
+            port: this.port,
+            pathname: apiBasePath + path,
+            qs: 'tempoApiToken=' + this.tempoApiKey
+        });
+
+        return decodeURIComponent(requestUrl);
+    };
+
     /**
      * Simple utility to build a REST endpoint URL for the Jira Auth API.
      *

@@ -30,5 +30,27 @@ function TempoClient(jiraClient) {
 
       return this.jiraClient.makeRequest(options, callback);
     };
+
+    /**
+     * Returns tempo schedule
+     *
+     * @method getShedule
+     * @memberOf TempoClient#
+     * @param opts The request options sent to the Jira Tempo Core API.
+     * @param [callback] Called when the projects have been retrieved.
+     * @return {Promise} Resolved when worklogs have been retrieved.
+     */
+    this.getShedule = function (opts, callback) {
+       var options = {
+          method: 'GET',
+          uri: this.jiraClient.buildTempoCoreURL('/user/schedule/'),
+          json: true,
+          followAllRedirects: true,
+          qs: opts
+       };
+
+      return this.jiraClient.makeRequest(options, callback);
+    };
+
 };
 
